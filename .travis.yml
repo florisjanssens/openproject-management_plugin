@@ -1,0 +1,162 @@
+language: ruby
+
+rvm:
+- 2.6.5
+
+sudo: required
+dist: xenial
+
+branches:
+  only:
+  - master
+
+cache:
+  bundler: true
+  # Notice, the directories directive is also used for files.
+  # This is the only way to do this and works, but if the cache doesn't exist yet
+  # it will create the file as a directory, this can easily be solved by just deleting it later
+  # as happens in this pipeline.
+  directories:
+  - ../openproject/Gemfile
+  - ../openproject/public/assets
+  - ../openproject/app/assets/javascripts/bundles
+  - ../openproject/app/assets/javascripts/locales
+  - ../openproject/last_succesfull_build_sha.txt
+
+env:
+  global:
+  # Using the gemfile: directive instead of BUNDLE_GEMFILE doesn't work. The gemfile: directive makes the job fail
+  # if the Gemfile isn't found. When preparing the cache, the Gemfile might be unavailable. The Gemfile is
+  # obtained when cloning the OpenProject core git repo in before_install. When using the gemfile:
+  # directive, the existance is checked before cloning the repo. The existance of the Gemfile
+  # specified in the BUNDLE_GEMFILE directive is only checked when actually installing Gems
+  # which happens after the before_install phase
+  - BUNDLE_GEMFILE="../openproject/Gemfile"
+  - CI=true
+  - RAILS_ENV=test
+  # Secured GitHub token, to increate the rate limiting of the GitHub API
+  - secure: fdsYNM2QaYlJx0Lp6L5ih6dCHg7oYScjbbKIfcNpNXdMw/na/4FSMoXOu47zNYdVLCzVC6bvq5fWWl+lFuBSkpPXiJhq6wQQXVzZchOdX3pVeJzoqoNf+1bRkTchWNz+qBz39tN2ayw8o3U0844YSVkJVa9F1rvt8zTE67izJhLLfDtLpUHe2+HYzcgGQazSJehA1U9Yz8mHyMnNOj67WFsdGiyYQgwAwHzGgdBggs4pHRbsbRQxeRGUdW/Ib09rpYR9XY9WToo0dQjoPiMb2Kf8D0Qf08jKkhQnxjmKNcUNKAEi08bQZK9B33SZUbQ1qLnCz04MgNRLcfg3eK2d1epHOrYq3O+qaG/d9RvY9WeJNDpvaEVkUz/ajGThKSA5R3WVOZkkNDMQKipkikKW4SoJrOFZ6eVFqzpqh81AX6Qk3JkLIcSFItix725kqvkSKxP6/D1Y8n2ovrTHq5M/wRC6Q87l2TGzjqLBytDe6hzOlRn0hRA8KPy8Xpa5CvSuWo6N1WQZ1niJxY4RQ9k/HTVkiwmlOBOniXBXf8HZeoDyim5bI9183j0HxbXS7QeKwREKMatMPTjZtvaW7otXYgKnEKz2VA4xPl6gvFq3V3pJhBOlURXOOIAsjOtDUn7Ec48m53uqdbumTsS+9BG6jEkK1kNay+eF0g8G0/ZEyWw=
+
+before_install:
+# Create openproject dir if it doesn't exist and cd into it
+# The OpenProject Core will be put inside this folder
+- mkdir -p ../openproject; cd ../openproject
+
+# Remove the Gemfile (if it exists, otherwise this command just finishes without error)
+# Necessary to be able to clone the OpenProject git repo into the current folder
+# The Gemfile is needed to make the Bundler cache of Travis CI work so it's cached between jobs
+- rm -rf Gemfile
+
+# Install the plugin in the core
+- cp $TRAVIS_BUILD_DIR/Gemfile.plugins Gemfile.plugins
+
+# (only executed in the prepare cache  job and reused later) get the SHA of the last succesfull
+# travis build of the OpenProject Core dev branch and store in a file for later use.
+# This SHA is kept the same for all jobs but is updated again for a completely new run of the pipeline.
+# The scripts/get_last_succesfull_sha.sh script uses GitHub API requests to finds this SHA
+- if [ "$TRAVIS_JOB_NAME" == "Prepare cache" ]; then rm -rf last_succesfull_build_sha.txt && $TRAVIS_BUILD_DIR/scripts/get_last_succesfull_sha.sh > last_succesfull_build_sha.txt; fi
+
+# Get the OpenProject core. Use fetch & checkout to be able to clone into
+# a non-empty directory
+- git init
+- git remote add openproject https://github.com/opf/openproject.git
+- git fetch --depth=30 openproject dev
+- git checkout $(cat last_succesfull_build_sha.txt)
+
+- gem install bundler
+- nvm install --lts
+
+bundler_args: "--binstubs --without development production docker --path ../openproject/vendor/bundle"
+
+stages:
+- prepare cache
+- test
+
+jobs:
+  include:
+  - stage: prepare cache
+    name: Prepare cache
+    script:
+    - bash script/ci/db_setup.sh
+    - bash script/ci/cache_prepare.sh
+  - stage: test
+    name: 'npm'
+    script:
+    - bash script/ci/setup.sh npm
+    - bash script/ci/runner.sh npm
+
+  - stage: test
+    name: 'spec_legacy (1/1) - standard'
+    script:
+    - bash script/ci/setup.sh spec_legacy
+    - bash script/ci/runner.sh spec_legacy 1 1
+
+  - stage: test
+    name: 'units (1/4) - standard'
+    script:
+    - bash script/ci/setup.sh units
+    - bash script/ci/runner.sh units 4 1
+
+  - stage: test
+    name: 'units (2/4) - standard'
+    script:
+    - bash script/ci/setup.sh units
+    - bash script/ci/runner.sh units 4 2
+
+  - stage: test
+    name: 'units (3/4) - standard'
+    script:
+    - bash script/ci/setup.sh units
+    - bash script/ci/runner.sh units 4 3
+
+  - stage: test
+    name: 'units (4/4) - standard'
+    script:
+    - bash script/ci/setup.sh units
+    - bash script/ci/runner.sh units 4 4
+
+  - stage: test
+    name: 'features (1/4) - standard'
+    script:
+    - bash script/ci/setup.sh features
+    - bash script/ci/runner.sh features 4 1
+
+  - stage: test
+    name: 'features (2/4) - standard'
+    script:
+    - bash script/ci/setup.sh features
+    - bash script/ci/runner.sh features 4 2
+
+  - stage: test
+    name: 'features (3/4) - standard'
+    script:
+    - bash script/ci/setup.sh features
+    - bash script/ci/runner.sh features 4 3
+
+  - stage: test
+    name: 'features (4/4) - standard'
+    script:
+    - bash script/ci/setup.sh features
+    - bash script/ci/runner.sh features 4 4
+
+  - stage: test
+    name: 'plugins:units (1/1) - standard'
+    script:
+    - bash script/ci/setup.sh plugins:units
+    - bash script/ci/runner.sh plugins:units 1 1
+
+  - stage: test
+    name: 'plugins:features (1/1) - standard'
+    script:
+    - bash script/ci/setup.sh plugins:features
+    - bash script/ci/runner.sh plugins:features 1 1
+
+  - stage: test
+    name: 'plugins:cucumber (1/1) - standard'
+    script:
+    - bash script/ci/setup.sh plugins:cucumber
+    - bash script/ci/runner.sh plugins:cucumber 1 1
+
+addons:
+  chrome: stable
+  postgresql: '9.6'
