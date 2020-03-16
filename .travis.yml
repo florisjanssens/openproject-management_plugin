@@ -63,6 +63,15 @@ before_install:
 - git fetch --depth=30 openproject dev
 - git checkout $(cat last_succesfull_build_sha.txt)
 
+# The OpenProject autoloader was changed recently, breaking the way plugins are installed 
+# before the change. The official documentation around installing plugins in development
+# (when installing from a folder) was also removed completely.
+# Copying the plugin to the modules folder of the core (and some changes made to the plugin)
+# solve this issue (the modules folder contains plugins which are integrated in the core).
+# The reason for this is that special rules are applied to this folder in the autoloader config.
+# This is only an issue for the development (or test in this case) setup. 
+- cp -r $TRAVIS_BUILD_DIR modules/
+
 - gem install bundler
 - nvm install --lts
 

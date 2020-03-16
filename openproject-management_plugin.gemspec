@@ -1,14 +1,9 @@
 # encoding: UTF-8
 
-$:.push File.expand_path('lib', __dir__)
-$:.push File.expand_path("../../lib", __dir__)
-
-require "open_project/management_plugin/version"
-
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
   s.name        = "openproject-management_plugin"
-  s.version     = OpenProject::ManagementPlugin::VERSION
+  s.version     = "0.0.1"
   s.authors     = "Floris Janssens"
   s.email       = "florisjanssens@outlook.com"
   s.homepage    = "https://gitlab.groept.be/floris.janssens/openproject-management-plugin.git"
