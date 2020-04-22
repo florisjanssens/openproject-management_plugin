@@ -33,7 +33,7 @@
 test=$(curl -s -H "Authorization: token $GITHUB_TOKEN" 'https://api.github.com/repos/opf/openproject/commits?sha=dev&per_page=200'| jq '.[] | {sha: .sha}')
 
 for row in $(echo "${test}" | jq -r '.[]'); do
-    match=$(curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/opf/openproject/commits/${row}/status | jq -r '. | select(.statuses[].context|test("continuous-integration/travis-ci/.")) | select(.state|test("success")).sha')
+    match=$(curl -s -H "Accept: application/vnd.github.antiope-preview+json" -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/opf/openproject/commits/${row}/check-runs | jq -r '.check_runs[] | select(.app.slug|test("travis-ci")) | select(.conclusion|test("success"))')
     
-    if [ ! -z ${match//\'+x} ]; then echo "${match}" && break; fi
+    if [ ! -z "$match" ]; then echo "${row}" && break ; fi
 done
