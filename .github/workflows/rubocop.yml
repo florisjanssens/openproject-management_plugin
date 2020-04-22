@@ -1,0 +1,33 @@
+# This workflow runs Rubocop validations using the latest Rubocop config used on the OpenProject dev branch
+name: Rubocop checks
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+
+jobs:
+  build:
+    name: Rubocop Prepare
+
+    runs-on: ubuntu-latest
+
+
+    steps:
+    # Checks-out the repository under $GITHUB_WORKSPACE
+    - uses: actions/checkout@v2
+
+    # Download the Rubocop config from the OpenProject dev branch
+    - name: Get OpenProject Rubocop config 
+      run: wget https://raw.githubusercontent.com/opf/openproject/dev/.rubocop.yml
+
+    # Run the actual Rubocop check
+    - name: Run Rubocop check
+      uses: andrewmcodes/rubocop-linter-action@v3.1.0
+      with:
+        # Define a path to your optional action config file.
+        action_config_path: .rubocop.yml
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
