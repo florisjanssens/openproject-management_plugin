@@ -1,5 +1,9 @@
 # OpenProject Management Plugin
 
+[![Build Status](https://travis-ci.com/florisjanssens/openproject-management_plugin.svg?token=Rqy6tmTtqW4aahqT8zzP&branch=master)](https://travis-ci.com/florisjanssens/openproject-management_plugin)
+![Rubocop checks](https://github.com/florisjanssens/openproject-management_plugin/workflows/Rubocop%20checks/badge.svg)
+
+
 This plugin adds features to OpenProject to efficiently manage users and projects. Initially, the goal is to bulk import users from a .csv file into OpenProject (and of course do this the right way including following code conventions, testing, error validation, etc.). More features will be added as time goes on. This README will contain a list of these different features in the future.
 
 More detailed information about OpenProject itself can be found at [OpenProject.org.](http://openproject.org/)
