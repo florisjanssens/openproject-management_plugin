@@ -1,4 +1,4 @@
-OpenProject user and project management plugin.
+OpenProject management plugin.
 
 Copyright (C) 2020 Floris Janssens (florisjanssens@outlook.com)
 

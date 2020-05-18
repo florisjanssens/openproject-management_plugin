@@ -1,5 +1,5 @@
 #-- copyright
-# OpenProject user and project management plugin.
+# OpenProject management plugin.
 # Copyright (C) 2020 Floris Janssens (florisjanssens@outlook.com)
 #
 # OpenProject is an open source project management software.
@@ -34,6 +34,6 @@ test=$(curl -s -H "Authorization: token $GITHUB_TOKEN" 'https://api.github.com/r
 
 for row in $(echo "${test}" | jq -r '.[]'); do
     match=$(curl -s -H "Accept: application/vnd.github.antiope-preview+json" -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/opf/openproject/commits/${row}/check-runs | jq -r '.check_runs[] | select(.app.slug|test("travis-ci")) | select(.conclusion|test("success"))')
-    
+
     if [ ! -z "$match" ]; then echo "${row}" && break ; fi
 done

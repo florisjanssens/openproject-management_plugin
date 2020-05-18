@@ -1,5 +1,5 @@
 #-- copyright
-# OpenProject user and project management plugin.
+# OpenProject management plugin.
 # Copyright (C) 2020 Floris Janssens (florisjanssens@outlook.com)
 #
 # OpenProject is an open source project management software.
