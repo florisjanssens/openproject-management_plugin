@@ -44,7 +44,6 @@ module OpenProject::ManagementPlugin
              global_assets: { css: 'management_plugin/management_plugin' },
              requires_openproject: '>= 10.5.2',
              bundled: true do
-
       menu :account_menu, :user_import,
            { controller: '/users', action: 'csv_import' },
            caption: "Bulk importer",
