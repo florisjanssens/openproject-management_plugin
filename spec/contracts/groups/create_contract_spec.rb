@@ -29,7 +29,28 @@
 # See doc/COPYRIGHT.md for more details.
 #++
 
-module Groups
-  class SetAttributesService < ::BaseServices::SetAttributes
+require 'spec_helper'
+require_relative './shared_contract_examples'
+
+describe Groups::CreateContract do
+  # NOTE: this will start the examples in ./shared_contract_examples.rb
+  # It uses the :group and :contract we define here
+  it_behaves_like 'group contract' do
+    # Defines a "memoized" helper method.
+    # group can now be used in the continuation of this code
+    # to call the method. The resulting value will be cached
+    # and used in subsequent calls.
+    # The result of the method is basically a test fixture of Group
+    # as defined in core/spec/factories/group_factory.rb
+    let(:group) do
+      Group.new(groupname: group_groupname)
+    end
+    # Subject is a special variable that refers to the object being tested
+    # (in this case the Groups::CreateContract). Basically lets
+    # RSpec call methods to the object without referring to it explicitly.
+    # The method basically creates the contract with the group fixture
+    # and a current user as parameters (current_user is defined differently
+    # inside different contexes)
+    subject(:contract) { described_class.new(group, current_user) }
   end
 end

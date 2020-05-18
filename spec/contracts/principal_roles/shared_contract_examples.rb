@@ -29,7 +29,53 @@
 # See doc/COPYRIGHT.md for more details.
 #++
 
-module Groups
-  class SetAttributesService < ::BaseServices::SetAttributes
+require 'spec_helper'
+
+shared_examples_for 'principal_role contract' do
+  let(:current_user) { FactoryBot.build_stubbed(:admin) }
+  let(:principal_role_principal) { FactoryBot.build_stubbed(:user) }
+  let(:principal_role_role) { FactoryBot.build_stubbed(:global_role) }
+
+  def expect_valid(valid, symbols = {})
+    expect(contract.validate).to eq(valid)
+
+    symbols.each do |key, arr|
+      expect(contract.errors.symbols_for(key)).to match_array arr
+    end
+  end
+
+  shared_examples 'is valid' do
+    it 'is valid' do
+      expect_valid(true)
+    end
+  end
+
+  # Check the validations
+  describe 'validation' do
+    it_behaves_like 'is valid'
+
+    # If the user isn't an admin, the contract is epected to be invalid
+    context 'if the user is not an administrator' do
+      let(:current_user) { FactoryBot.build_stubbed(:user) }
+      it 'is invalid' do
+        expect_valid(false, base: %i(error_unauthorized))
+      end
+    end
+
+    context 'if the role is nil' do
+      let(:principal_role_role) { nil }
+
+      it 'is invalid' do
+        expect_valid(false, role: %i(blank))
+      end
+    end
+
+    context 'if the principal is nil' do
+      let(:principal_role_principal) { nil }
+
+      it 'is invalid' do
+        expect_valid(false, principal: %i(blank))
+      end
+    end
   end
 end
