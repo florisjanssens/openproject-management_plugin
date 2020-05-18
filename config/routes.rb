@@ -29,31 +29,9 @@
 # See doc/COPYRIGHT.md for more details.
 #++
 
-# Prevent load-order problems in case openproject-plugins is listed after a plugin in the Gemfile
-# or not at all
-require 'open_project/plugins'
-
-module OpenProject::ManagementPlugin
-  class Engine < ::Rails::Engine
-    engine_name :openproject_management_plugin
-
-    include OpenProject::Plugins::ActsAsOpEngine
-
-    register 'openproject-management_plugin',
-             author_url: 'https://openproject.org',
-             global_assets: { css: 'management_plugin/management_plugin' },
-             requires_openproject: '>= 10.5.2',
-             bundled: true do
-
-      menu :account_menu, :user_import,
-           { controller: '/users', action: 'csv_import' },
-           caption: "Bulk importer",
-           before: :logout,
-           if: Proc.new {
-             User.current.logged? && User.current.allowed_to?(:import_users, nil, global: true)
-           }
-    end
-
-    patches %i[UsersController]
+OpenProject::Application.routes.draw do
+  scope controller: 'users' do
+    get 'bulk/import', controller: 'users', action: 'csv_import'
+    post 'bulk/import_submit', controller: 'users', action: 'csv_import_submit'
   end
 end

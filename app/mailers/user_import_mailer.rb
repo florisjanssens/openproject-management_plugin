@@ -29,31 +29,15 @@
 # See doc/COPYRIGHT.md for more details.
 #++
 
-# Prevent load-order problems in case openproject-plugins is listed after a plugin in the Gemfile
-# or not at all
-require 'open_project/plugins'
+class UserImportMailer < BaseMailer
+  def import_users_completed(user, errors, created)
+    @errors = errors
+    @created = created
 
-module OpenProject::ManagementPlugin
-  class Engine < ::Rails::Engine
-    engine_name :openproject_management_plugin
+    open_project_headers Author: user.login
 
-    include OpenProject::Plugins::ActsAsOpEngine
+    subject = "User import completed"
 
-    register 'openproject-management_plugin',
-             author_url: 'https://openproject.org',
-             global_assets: { css: 'management_plugin/management_plugin' },
-             requires_openproject: '>= 10.5.2',
-             bundled: true do
-
-      menu :account_menu, :user_import,
-           { controller: '/users', action: 'csv_import' },
-           caption: "Bulk importer",
-           before: :logout,
-           if: Proc.new {
-             User.current.logged? && User.current.allowed_to?(:import_users, nil, global: true)
-           }
-    end
-
-    patches %i[UsersController]
+    mail to: user.mail, subject: subject
   end
 end

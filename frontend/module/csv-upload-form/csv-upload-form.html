@@ -1,0 +1,130 @@
+<!-- -- copyright
+OpenProject management plugin.
+Copyright (C) 2020 Floris Janssens (florisjanssens@outlook.com)
+
+OpenProject is an open source project management software.
+Copyright (C) 2012-2020 the OpenProject GmbH
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License version 3.
+
+OpenProject is a fork of ChiliProject, which is a fork of Redmine. The copyright follows:
+Copyright (C) 2006-2017 Jean-Philippe Lang
+Copyright (C) 2010-2013 the ChiliProject Team
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+See doc/COPYRIGHT.md for more details.
+++ -->
+
+<section class="form--section">
+  <div class="form--field">
+    <label class="form--label"
+      [ngClass]="{ '-error':  fileInvalid }"
+      [textContent]="text.label_choose_csv"
+      for="csv_file_input">
+    </label>
+    <div class="form--field-container">
+      <input #csvFilePicker
+         type="file"
+         accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+         id="csv_file_input"
+         name="csv_file_input"
+         class="form--file-field"
+         (change)="onFilePickerChanged($event)" />
+    </div>
+    <div class="form--field-instructions">
+      <span [textContent]="text.upload_instructions"></span>
+      <div class="csv--error-pane">
+        <span *ngIf="fileInvalid" [textContent]="text.wrong_file_format"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<fieldset class="form--fieldset">
+  <legend class="form--fieldset-legend"
+    [textContent]="text.legend_import_settings">
+  </legend>
+
+
+  <div class="form--field">
+    <label class="form--label"
+      [textContent]="text.label_authentication_method"
+      for="authentication_method_select">
+    </label>
+    <div class="form--field-container">
+      <div class="form--select-container -slim">
+        <select #authenticationMethodSelect
+          name="authentication_method_select"
+          id="authentication_method_select"
+          (change)="onAuthenticationMethodSelectChanged($event)"
+          class="form--select -slim">
+          <option *ngFor="let item of authenticationMethods" [value]="item.value" [textContent]="item.text"></option>
+        </select>
+      </div>
+    </div>
+    <div class="form--field-instructions">
+      <span [textContent]="text.authentication_method_instructions"></span>
+    </div>
+  </div>
+
+  <div class="form--field" *ngIf="identityUrlProvider">
+    <label class="form--label"
+      [textContent]="text.label_identity_url_prefix"
+      for="identity_url_prefix_textfield">
+    </label>
+    <div class="form--field-container">
+      <div class="form--text-field-container -slim">
+        <input id="identity_url_prefix_textfield"
+          name="identity_url_prefix_textfield"
+          class="form--text-field -slim"
+          type="text"
+          required pattern="[a-zA-Z0-9]([a-zA-Z0-9_-]?[a-zA-Z0-9])*" maxlength="40"
+          [placeholder]="text.identity_url_prefix_textfield" />
+      </div>
+    </div>
+    <div class="form--field-instructions">
+      <span [textContent]="text.identity_url_prefix_instructions"></span><br>
+      <strong [textContent]="text.identity_url_prefix_format_instructions"></strong>
+    </div>
+  </div>
+
+  <div class="form--field">
+    <label class="form--label"
+      [textContent]="text.label_create_non_existing"
+      for="create_non_existing_checkbox">
+    </label>
+    <div class="form--field-container">
+      <div class="form--check-box-container">
+        <input id="create_non_existing_checkbox"
+          name="create_non_existing_checkbox"
+          type="checkbox"
+          [checked]="true"
+          value="1"
+          class="form--check-box" />
+      </div>
+    </div>
+    <div class="form--field-instructions">
+      <span [textContent]="text.create_non_existing_instructions"></span>
+    </div>
+  </div>
+</fieldset>
+
+<button type="submit"
+  [attr.disabled]="!csvFile || undefined"
+  [textContent]="text.button_import"
+  class="button -highlight -with-icon icon-checkmark">
+</button>
