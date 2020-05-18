@@ -33,5 +33,6 @@ OpenProject::Application.routes.draw do
   scope controller: 'users' do
     get 'bulk/import', controller: 'users', action: 'csv_import'
     post 'bulk/import_submit', controller: 'users', action: 'csv_import_submit'
+    get 'bulk/import_tutorial', controller: 'users', action: 'csv_import_tutorial'
   end
 end
