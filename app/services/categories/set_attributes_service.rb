@@ -29,15 +29,7 @@
 # See doc/COPYRIGHT.md for more details.
 #++
 
-OpenProject::Application.routes.draw do
-  scope controller: 'users' do
-    get 'bulk/import', controller: 'users', action: 'csv_import'
-    get 'bulk/import_tutorial', controller: 'users', action: 'csv_import_tutorial'
-    post 'bulk/import_submit', controller: 'users', action: 'csv_import_submit'
-  end
-
-  scope 'projects/:id' do
-    get 'settings/bulk_setter', controller: 'project_settings/bulk_setter', action: 'show', as: 'settings_bulk_setter'
-    post 'bulk_copy_settings', controller: 'projects', action: 'bulk_copy_settings'
+module Categories
+  class SetAttributesService < ::BaseServices::SetAttributes
   end
 end

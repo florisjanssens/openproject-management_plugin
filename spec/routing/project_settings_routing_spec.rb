@@ -29,15 +29,16 @@
 # See doc/COPYRIGHT.md for more details.
 #++
 
-OpenProject::Application.routes.draw do
-  scope controller: 'users' do
-    get 'bulk/import', controller: 'users', action: 'csv_import'
-    get 'bulk/import_tutorial', controller: 'users', action: 'csv_import_tutorial'
-    post 'bulk/import_submit', controller: 'users', action: 'csv_import_submit'
-  end
+require 'spec_helper'
 
-  scope 'projects/:id' do
-    get 'settings/bulk_setter', controller: 'project_settings/bulk_setter', action: 'show', as: 'settings_bulk_setter'
-    post 'bulk_copy_settings', controller: 'projects', action: 'bulk_copy_settings'
+describe ProjectSettingsController, type: :routing do
+  describe 'show' do
+    it do
+      expect(get('/projects/123/settings/bulk_setter')).to route_to(
+        controller: 'project_settings/bulk_setter',
+        action: 'show',
+        id: '123'
+      )
+    end
   end
 end

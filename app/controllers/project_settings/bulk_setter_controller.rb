@@ -29,15 +29,28 @@
 # See doc/COPYRIGHT.md for more details.
 #++
 
-OpenProject::Application.routes.draw do
-  scope controller: 'users' do
-    get 'bulk/import', controller: 'users', action: 'csv_import'
-    get 'bulk/import_tutorial', controller: 'users', action: 'csv_import_tutorial'
-    post 'bulk/import_submit', controller: 'users', action: 'csv_import_submit'
+class ProjectSettings::BulkSetterController < ProjectSettingsController
+  menu_item :settings_bulk_setter
+
+  # The project needs to have children to be able to bulk copy settings
+  # If it doesn't have children, render the 403 error page.
+  # Technically, the user wouldn't be able to get here if the project doesn't have
+  # children, but the URL could still be entered manually without this.
+  # Nothing can go wrong even if the user could get here, so this is more
+  # for completion sake.
+  before_action :verify_children_present
+  # Authorization and checking if the project actually exists, is already
+  # done in the super class. Again, this is just to determine if the bulk setter
+  # view can be rendered or not. Even if authorization, etc. wasn't checked here,
+  # there are more checks down the line.
+
+  def show
+    render template: 'project_settings/bulk_setter'
   end
 
-  scope 'projects/:id' do
-    get 'settings/bulk_setter', controller: 'project_settings/bulk_setter', action: 'show', as: 'settings_bulk_setter'
-    post 'bulk_copy_settings', controller: 'projects', action: 'bulk_copy_settings'
+  private
+
+  def verify_children_present
+    render_403 unless @project.children.present?
   end
 end

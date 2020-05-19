@@ -29,15 +29,30 @@
 # See doc/COPYRIGHT.md for more details.
 #++
 
-OpenProject::Application.routes.draw do
-  scope controller: 'users' do
-    get 'bulk/import', controller: 'users', action: 'csv_import'
-    get 'bulk/import_tutorial', controller: 'users', action: 'csv_import_tutorial'
-    post 'bulk/import_submit', controller: 'users', action: 'csv_import_submit'
-  end
+require 'spec_helper'
+require_relative './shared_contract_examples'
 
-  scope 'projects/:id' do
-    get 'settings/bulk_setter', controller: 'project_settings/bulk_setter', action: 'show', as: 'settings_bulk_setter'
-    post 'bulk_copy_settings', controller: 'projects', action: 'bulk_copy_settings'
+describe Categories::CreateContract do
+  # NOTE: this will start the examples in ./shared_contract_examples.rb
+  # It uses the :category and :contract we define here
+  it_behaves_like 'category contract' do
+    # Defines a "memoized" helper method.
+    # category can now be used in the continuation of this code
+    # to call the method. The resulting value will be cached
+    # and used in subsequent calls.
+    # The result of the method is basically a test fixture of Category
+    # as defined in core/spec/factories/category_factory.rb
+    let(:category) do
+      Category.new(name: category_name,
+                   project: category_project,
+                   assigned_to: nil)
+    end
+    # Subject is a special variable that refers to the object being tested
+    # (in this case the Categories::CreateContract). Basically lets
+    # RSpec call methods to the object without referring to it explicitly.
+    # The method basically creates the contract with the category fixture
+    # and a current user as parameters (current_user is defined differently
+    # inside different contexes)
+    subject(:contract) { described_class.new(category, current_user) }
   end
 end

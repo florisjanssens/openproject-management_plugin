@@ -1,0 +1,249 @@
+<%#-- copyright
+OpenProject management plugin.
+Copyright (C) 2020 Floris Janssens (florisjanssens@outlook.com)
+
+OpenProject is an open source project management software.
+Copyright (C) 2012-2020 the OpenProject GmbH
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License version 3.
+
+OpenProject is a fork of ChiliProject, which is a fork of Redmine. The copyright follows:
+Copyright (C) 2006-2017 Jean-Philippe Lang
+Copyright (C) 2010-2013 the ChiliProject Team
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+See doc/COPYRIGHT.md for more details.
+++#%>
+
+<%= javascript_include_tag 'start_bulk_setter.js' %>
+
+<%= toolbar title: "Bulk copy settings", html: { class: '-minimum-title' } %>
+
+<div>
+  <p>This function makes it possible to bulk apply the settings of this parent project to all <strong>non-archived</strong> sub-projects of this parent project. This function also preserves work done in invidivual sub-projects (like work packages) and can therefore be used for projects which are already in progress.</p>
+  <p>Before using this function, make sure the current parent project has the configuration you want to copy, select which settings should be copied and click the 'Apply' button to start copying.</p>
+  <p><i><strong>Note:</strong> This function is mostly made to be used in scenarios where a parent project is used as a template for one or more sub-projects. In this scenario, one would use the same settings like versions, enabled modules, etc. between parent projects and sub-projects.</i></p>
+</div>
+
+<%= labelled_tabular_form_for @project,
+                              url: { controller: '/projects',
+                                     action: 'bulk_copy_settings' },
+                              method: :post do |form| %>
+
+  <fieldset class="form--fieldset -collapsible" id="project_information" >
+    <legend class="form--fieldset-legend">Project information</legend>
+    <div class="form--toolbar">
+      <span class="form--toolbar-item">(<%= check_all_links "project_information" %>)</span>
+    </div>
+
+    <% if User.current.allowed_to?(:edit_project, @project) %>
+      <div class="form--field">
+        <%= styled_label_tag 'selected_settings_attributes_description', l_or_humanize("description", prefix: 'project_setting_')  %>
+        <div class="form--field-container">
+          <%= styled_check_box_tag 'selected_settings[attributes][]', "description", false, id: 'selected_settings_attributes_description' %>
+        </div>
+        <div class="form--field-instructions">
+          <span>Copies the description of this parent project to all sub-projects.</span>
+        </div>
+      </div>
+
+      <div class="form--field">
+        <%= styled_label_tag 'selected_settings_attributes_status', l_or_humanize("project status", prefix: 'project_setting_')  %>
+        <div class="form--field-container">
+          <%= styled_check_box_tag 'selected_settings[attributes][]', "status", false, id: 'selected_settings_attributes_status' %>
+        </div>
+        <div class="form--field-instructions">
+          <span>Copies the status and status description of this parent project to all sub-projects.</span>
+        </div>
+      </div>
+
+      <div class="form--field">
+        <%= styled_label_tag 'selected_settings_attributes_public', l_or_humanize("public state", prefix: 'project_setting_')  %>
+        <div class="form--field-container">
+          <%= styled_check_box_tag 'selected_settings[attributes][]', "public", false, id: 'selected_settings_attributes_public' %>
+        </div>
+        <div class="form--field-instructions">
+          <span>Disables or enables the public visibility of all sub-projects based on the visibility of this parent project.</span>
+        </div>
+      </div>
+    <% else %>
+      <div class="not-allowed_error">
+        <p>You don't have permission to edit project information.</p>
+      </div>
+    <% end %>
+  </fieldset>
+
+  <fieldset class="form--fieldset -collapsible" id="project_modules" >
+    <legend class="form--fieldset-legend">Project modules</legend>
+    <div class="form--toolbar">
+      <span class="form--toolbar-item">(<%= check_all_links "project_modules" %>)</span>
+    </div>
+
+    <% if User.current.allowed_to?(:edit_project, @project) && User.current.allowed_to?(:select_project_modules, @project) %>
+
+      <div class="form--field">
+        <%= styled_label_tag 'selected_settings_attributes_modules', l_or_humanize("modules", prefix: 'project_setting_')  %>
+        <div class="form--field-container">
+          <%= styled_check_box_tag 'selected_settings[attributes][]', "enabled_module_names", false, id: 'selected_settings_attributes_modules' %>
+        </div>
+        <div class="form--field-instructions">
+          <span>Copies the enabled/disabled state of modules of this parent project to all sub-projects.</span>
+        </div>
+      </div>
+    <% else %>
+      <div class="not-allowed_error">
+        <p>You don't have permission to edit the modules of this project.</p>
+      </div>
+    <% end %>
+  </fieldset>
+
+  <fieldset class="form--fieldset -collapsible" id="project_work_package_types" >
+    <legend class="form--fieldset-legend">Project work package types</legend>
+    <div class="form--toolbar">
+      <span class="form--toolbar-item">(<%= check_all_links "project_work_package_types" %>)</span>
+    </div>
+
+    <% if User.current.allowed_to?(:edit_project, @project) && User.current.allowed_to?(:manage_types, @project) %>
+      <div class="form--field">
+        <%= styled_label_tag 'selected_settings_attributes_work_package_types', l_or_humanize("work package types", prefix: 'project_setting_')  %>
+        <div class="form--field-container">
+          <%= styled_check_box_tag 'selected_settings[attributes][]', "type_ids", false, id: 'selected_settings_attributes_work_package_types' %>
+        </div>
+        <div class="form--field-instructions">
+          <span>Copies the enabled/disabled state of work package types of this parent project to all sub-projects.</span>
+        </div>
+      </div>
+    <% else %>
+      <div class="not-allowed_error">
+        <p>You don't have permission to edit the work package types of this project.</p>
+      </div>
+    <% end %>
+  </fieldset>
+
+  <fieldset class="form--fieldset -collapsible" id="project_custom_fields" >
+    <legend class="form--fieldset-legend">Project custom fields</legend>
+    <div class="form--toolbar">
+      <span class="form--toolbar-item">(<%= check_all_links "project_custom_fields" %>)</span>
+    </div>
+
+    <% if User.current.allowed_to?(:edit_project, @project) %>
+      <div class="form--field">
+        <%= styled_label_tag 'selected_settings_attributes_custom_fields', l_or_humanize("custom fields", prefix: 'project_setting_')  %>
+        <div class="form--field-container">
+          <%= styled_check_box_tag 'selected_settings[attributes][]', "work_package_custom_field_ids", false, id: 'selected_settings_attributes_custom_fields' %>
+        </div>
+        <div class="form--field-instructions">
+          <span>Copies the enabled/disabled state of custom fields of this parent project to all sub-projects.</span>
+        </div>
+      </div>
+    <% else %>
+      <div class="not-allowed_error">
+        <p>You don't have permission to edit the enabled/disabled custom fields of this project.</p>
+      </div>
+    <% end %>
+  </fieldset>
+
+  <fieldset class="form--fieldset -collapsible" id="project_categories" >
+    <legend class="form--fieldset-legend">Project work package categories</legend>
+    <div class="form--toolbar">
+      <span class="form--toolbar-item">(<%= check_all_links "project_categories" %>)</span>
+    </div>
+    <% if User.current.allowed_to?(:manage_categories, @project) %>
+      <div class="form--field">
+        <%= styled_label_tag 'selected_settings_categories_new_categories', l_or_humanize("new categories", prefix: 'project_setting_')  %>
+        <div class="form--field-container">
+          <%= styled_check_box_tag 'selected_settings[categories][]', "new_categories", false, id: 'selected_settings_categories_new_categories' %>
+        </div>
+        <div class="form--field-instructions">
+          <span>Adds work package categories of the parent project to sub-projects for which the categories don't exist already. Doesn't copy the assignee.</span>
+        </div>
+      </div>
+    <% else %>
+      <div class="not-allowed_error">
+        <p>You don't have permission to manage work package categories of this project.</p>
+      </div>
+    <% end %>
+  </fieldset>
+
+  <fieldset class="form--fieldset -collapsible" id="project_versions" >
+    <legend class="form--fieldset-legend">Project versions</legend>
+    <div class="form--toolbar">
+      <span class="form--toolbar-item">(<%= check_all_links "project_versions" %>)</span>
+    </div>
+    <% if User.current.allowed_to?(:manage_versions, @project) %>
+      <div>
+        <p><i><strong>Note:</strong> This function can only copy between versions of this parent project which have the same name as the versions of the sub-projects to copy to. This is caused by limitations inherited by the design of OpenProject which make it impossible for a plugin to reliably link versions while keeping the code maintainable.</i></p>
+      </div>
+
+      <div class="form--field">
+        <%= styled_label_tag 'selected_settings_versions_start_dates', l_or_humanize("version start dates", prefix: 'project_setting_')  %>
+        <div class="form--field-container">
+          <%= styled_check_box_tag 'selected_settings[versions][]', "start_date", false, id: 'selected_settings_versions_start_dates' %>
+        </div>
+        <div class="form--field-instructions">
+          <span>Copies the start dates of the versions of this parent project to the corresponding versions of its sub-projects.</span>
+        </div>
+      </div>
+
+      <div class="form--field">
+        <%= styled_label_tag 'selected_settings_versions_end_dates', l_or_humanize("version end dates", prefix: 'project_setting_')  %>
+        <div class="form--field-container">
+          <%= styled_check_box_tag 'selected_settings[versions][]', "effective_date", false, id: 'selected_settings_versions_end_dates' %>
+        </div>
+        <div class="form--field-instructions">
+          <span>Copies the end dates of the versions of this parent project to the corresponding versions of its sub-projects.</span>
+        </div>
+      </div>
+
+      <div class="form--field">
+        <%= styled_label_tag 'selected_settings_versions_descriptions', l_or_humanize("version descriptions", prefix: 'project_setting_')  %>
+        <div class="form--field-container">
+          <%= styled_check_box_tag 'selected_settings[versions][]', "description", false, id: 'selected_settings_versions_descriptions' %>
+        </div>
+        <div class="form--field-instructions">
+          <span>Copies the descriptions of the versions of this parent project to the corresponding versions of its sub-projects.</span>
+        </div>
+      </div>
+
+      <div class="form--field">
+        <%= styled_label_tag 'selected_settings_versions_statuses', l_or_humanize("version statuses", prefix: 'project_setting_')  %>
+        <div class="form--field-container">
+          <%= styled_check_box_tag 'selected_settings[versions][]', "status", false, id: 'selected_settings_versions_statuses' %>
+        </div>
+        <div class="form--field-instructions">
+          <span>Copies the statuses of the versions of this parent project to all sub-projects.</span>
+        </div>
+      </div>
+
+      <div class="form--field">
+        <%= styled_label_tag 'selected_settings_versions_new_versions', l_or_humanize("new versions", prefix: 'project_setting_')  %>
+        <div class="form--field-container">
+          <%= styled_check_box_tag 'selected_settings[versions][]', "new_versions", false, id: 'selected_settings_versions_new_versions' %>
+        </div>
+        <div class="form--field-instructions">
+          <span>Adds versions of the parent project to sub-projects for which the versions don't exist already. Only adds versions which aren't closed or shared.</span>
+        </div>
+      </div>
+    <% else %>
+      <div class="not-allowed_error">
+        <p>You don't have permission to manage versions of this project.</p>
+      </div>
+    <% end %>
+  </fieldset>
+
+  <p><%= form.button l(:button_apply), id: 'start-bulk-setter-button', class: 'button -no-margin -highlight -with-icon icon-checkmark' %> <span class="none-selected-error">You must select at least one setting to copy!</span></p>
+<% end %>
