@@ -44,6 +44,30 @@ module OpenProject::ManagementPlugin
              global_assets: { css: 'management_plugin/management_plugin' },
              requires_openproject: '>= 10.5.2',
              bundled: true do
+      OpenProject::AccessControl.permission(:edit_project).actions << 'project_settings/bulk_setter/show'
+      OpenProject::AccessControl.permission(:manage_versions).actions << 'project_settings/bulk_setter/show'
+      OpenProject::AccessControl.permission(:manage_categories).actions << 'project_settings/bulk_setter/show'
+      OpenProject::AccessControl.permission(:edit_project).actions << 'projects/bulk_copy_settings'
+      OpenProject::AccessControl.permission(:manage_versions).actions << 'projects/bulk_copy_settings'
+      OpenProject::AccessControl.permission(:manage_categories).actions << 'projects/bulk_copy_settings'
+
+      menu :project_menu, :settings_bulk_setter,
+           { controller: '/project_settings/bulk_setter', action: 'show' },
+           caption: "Bulk copy settings",
+           parent: :settings,
+           if: ->(project) {
+             project.children.present? &&
+               (
+                 # :edit_project is required for :select_project_modules and :manage_types to be possible
+                 # Therefore, checking for the :select_project_modules and :select_types permissions isn't
+                 # necessary because the user would need the :edit_project permission anyway
+                 User.current.allowed_to?(:edit_project, project) ||
+                 User.current.allowed_to?(:manage_versions, project) ||
+                 User.current.allowed_to?(:manage_categories, project)
+               )
+           },
+           last: true
+
       menu :account_menu, :user_import,
            { controller: '/users', action: 'csv_import' },
            caption: "Bulk importer",
@@ -53,11 +77,16 @@ module OpenProject::ManagementPlugin
            }
     end
 
-    patches %i[UsersController]
+    patches %i[UsersController ProjectsController]
 
     # Activate hooks to insert element into views of the core
     initializer 'management_plugin.register_hooks' do
       require 'open_project/management_plugin/hooks'
+    end
+
+    # This is done to precompile the start_bulk_setter.js asset in production
+    initializer 'managementplugin.precompile_assets' do
+      Rails.application.config.assets.precompile += %w(start_bulk_setter.js)
     end
   end
 end
