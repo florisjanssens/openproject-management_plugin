@@ -29,35 +29,28 @@
 # See doc/COPYRIGHT.md for more details.
 #++
 
-# Prevent load-order problems in case openproject-plugins is listed after a plugin in the Gemfile
-# or not at all
-require 'open_project/plugins'
+require 'spec_helper'
+require_relative './shared_contract_examples'
 
-module OpenProject::ManagementPlugin
-  class Engine < ::Rails::Engine
-    engine_name :openproject_management_plugin
-
-    include OpenProject::Plugins::ActsAsOpEngine
-
-    register 'openproject-management_plugin',
-             author_url: 'https://openproject.org',
-             global_assets: { css: 'management_plugin/management_plugin' },
-             requires_openproject: '>= 10.5.2',
-             bundled: true do
-      menu :account_menu, :user_import,
-           { controller: '/users', action: 'csv_import' },
-           caption: "Bulk importer",
-           before: :logout,
-           if: Proc.new {
-             User.current.logged? && User.current.allowed_to?(:import_users, nil, global: true)
-           }
+describe Groups::CreateContract do
+  # NOTE: this will start the examples in ./shared_contract_examples.rb
+  # It uses the :group and :contract we define here
+  it_behaves_like 'group contract' do
+    # Defines a "memoized" helper method.
+    # group can now be used in the continuation of this code
+    # to call the method. The resulting value will be cached
+    # and used in subsequent calls.
+    # The result of the method is basically a test fixture of Group
+    # as defined in core/spec/factories/group_factory.rb
+    let(:group) do
+      Group.new(groupname: group_groupname)
     end
-
-    patches %i[UsersController]
-
-    # Activate hooks to insert element into views of the core
-    initializer 'management_plugin.register_hooks' do
-      require 'open_project/management_plugin/hooks'
-    end
+    # Subject is a special variable that refers to the object being tested
+    # (in this case the Groups::CreateContract). Basically lets
+    # RSpec call methods to the object without referring to it explicitly.
+    # The method basically creates the contract with the group fixture
+    # and a current user as parameters (current_user is defined differently
+    # inside different contexes)
+    subject(:contract) { described_class.new(group, current_user) }
   end
 end

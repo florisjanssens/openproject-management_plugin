@@ -29,35 +29,48 @@
 # See doc/COPYRIGHT.md for more details.
 #++
 
-# Prevent load-order problems in case openproject-plugins is listed after a plugin in the Gemfile
-# or not at all
-require 'open_project/plugins'
+module PrincipalRoles
+  class BaseContract < ::ModelContract
+    include AssignableValuesContract
 
-module OpenProject::ManagementPlugin
-  class Engine < ::Rails::Engine
-    engine_name :openproject_management_plugin
+    delegate :role_id,
+             :principal_id,
+             :new_record?,
+             to: :model
 
-    include OpenProject::Plugins::ActsAsOpEngine
-
-    register 'openproject-management_plugin',
-             author_url: 'https://openproject.org',
-             global_assets: { css: 'management_plugin/management_plugin' },
-             requires_openproject: '>= 10.5.2',
-             bundled: true do
-      menu :account_menu, :user_import,
-           { controller: '/users', action: 'csv_import' },
-           caption: "Bulk importer",
-           before: :logout,
-           if: Proc.new {
-             User.current.logged? && User.current.allowed_to?(:import_users, nil, global: true)
-           }
+    def self.model
+      PrincipalRole
     end
 
-    patches %i[UsersController]
+    # Extend the validate method of the ModelContract with extra validations
+    # Note that the ModelContract runs validations like attribute validations or
+    # model validations and adds the errors together with the contract errors.
+    def validate
+      user_allowed_to_manage
+      validate_role_is_set
+      validate_principal_is_set
+      super
+    end
 
-    # Activate hooks to insert element into views of the core
-    initializer 'management_plugin.register_hooks' do
-      require 'open_project/management_plugin/hooks'
+    private
+
+    # Only admins can edit assignment to global roles
+    def user_allowed_to_manage
+      unless user.admin?
+        errors.add :base, :error_unauthorized
+      end
+    end
+
+    # Check if a role was given (this would also give an error
+    # if only a role_id was passed and a role with the id doesn't exist)
+    def validate_role_is_set
+      errors.add :role, :blank if model.role.nil?
+    end
+
+    # Check if a principal was given (this would also give an error
+    # if only a principal_id was passed and a principal with the id doesn't exist)
+    def validate_principal_is_set
+      errors.add :principal, :blank if model.principal.nil?
     end
   end
 end

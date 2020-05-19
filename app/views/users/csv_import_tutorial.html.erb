@@ -1,0 +1,333 @@
+<%#-- copyright
+OpenProject management plugin.
+Copyright (C) 2020 Floris Janssens (florisjanssens@outlook.com)
+
+OpenProject is an open source project management software.
+Copyright (C) 2012-2020 the OpenProject GmbH
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License version 3.
+
+OpenProject is a fork of ChiliProject, which is a fork of Redmine. The copyright follows:
+Copyright (C) 2006-2017 Jean-Philippe Lang
+Copyright (C) 2010-2013 the ChiliProject Team
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+See doc/COPYRIGHT.md for more details.
+++#%>
+
+<% html_title l(:label_administration), "Tutorial: Import users" %>
+<% local_assigns[:additional_breadcrumb] = "Import Users" %>
+<%= breadcrumb_toolbar "Tutorial: Import Users" %>
+
+<div class="wiki -slim">
+
+  <fieldset class="form--fieldset -collapsible">
+    <legend class="form--fieldset-legend" title="Show/Hide table of contents" >
+      <a href="#">Table of Contents</a>
+    </legend>
+    <div>
+      <ul class="toc">
+        <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#importing">Importing a CSV</a>
+          <ul>
+            <li><a href="#import_settings">Import settings</a></li>
+            <li><a href="#csv_construction">Constructing the CSV</a></li>
+            <li><a href="#after_import">After the import</a></li>
+          </ul>
+        </li>
+        <li><a href="#example_csv">Download: Example CSV</a></li>
+      </ul>
+    </div>
+  </fieldset>
+
+  <h3 id="introduction">Introduction</h3>
+  <p>Welcome to this tutorial!</p>
+  <p>
+    The goal of this tutorial is to guide users on how to use the <%= link_to "user import function", { action: :csv_import }, target: :_blank %>.
+    Using this function, admins can bulk import users, groups, global roles, project roles, parent projects and sub-projects.
+    Imported or existing users can also be assigned to created or existing groups, roles and projects in many different configurations.
+  </p>
+  <p>
+    While sounding straightforward, many configurations are possible and supported by this function.
+    Some examples are:
+  </p>
+  <ul>
+    <li>Different authentication methods
+      <ul>
+        <li>By OAuth identity provider</li>
+        <li>By password (email invitation)</li>
+      </ul>
+    </li>
+    <li>Creating users, groups, roles and projects
+      <ul>
+        <li>Roles can be global or project-specific</li>
+        <li>Sub-projects are copied from the created/existing parent project</li>
+      </ul>
+    </li>
+    <li>Assigning created/existing users to groups, roles and projects
+      <ul>
+        <li>Users can be assigned both global roles and specific roles in projects</li>
+        <li>Users can be assigned to projects individually or by group</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h3 id="importing">Importing a CSV</h3>
+  <p>
+    The goal of this section is to explain how a CSV can be imported using the <%= link_to "user import function", { action: :csv_import }, target: :_blank %>.
+    The different import settings will be discussed as well as the format which should be used to construct the CSV.
+    The way in which each CSV record is constructed also influences the action that will occur (e.g. whether or not a role will be global or project related, whether the user will be added to a project by group or individually and much more).
+  </p>
+  <p><i><strong>Please note:</strong> you can download an example CSV at the <a href="#example_csv">bottom of this page</a> which already contains the right format and practical examples.</i></p>
+
+  <h4 id="import_settings">Import settings</h4>
+  <p>
+    On the <%= link_to "user import function page", { action: :csv_import }, target: :_blank %>, you get the option to select the CSV you want to import.
+    Before starting the import, you can also set a few different import settings on this page. This subsection provides a brief overview on these different import settings.
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Setting</th>
+        <th>Explanation</th>
+      </tr>
+      <tr>
+        <td rowspan="2">User authentication method</td>
+        <td>
+          <p><strong>Identity URL option:</strong>
+          Select this option if your configuration uses an OmniAuth provider. This is probably the case if your configuration allowes users to sign in via existing services like Shibboleth, Google, etc.</p>
+          <p>A column called 'identity_url' should be included inside the CSV you want to import if this option was chosen. This column should contain the user ID of the user on the OmniAuth identity provider (e.g. u1234567). Please contact your admin if you don't know what to enter for the 'identity_url'.</p>
+          <p><i><strong>Note:</strong> in a general OmniAuth configuration, users would be able to create their own account using their existing account on the identity provider. However, this import setting will come in handy if this is disabled in your configuration or you want accounts to be premade and put into the right groups, roles or projects.</i></p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            <strong>Password (email invitation) option:</strong>
+            Select this option if you want new users to receive an invitation link via email. Clicking this invitation link allows the user to pick a password and authenticate by password from then on. The user will be assigned to the right groups, roles or projects even before accepting the invitation.
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td>Identity URL prefix</td>
+        <td>
+          <p>
+            <strong>Only if 'Identity URL' was selected as authentication method:</strong>
+            Enter the name of the used OmniAuth provider in this field (e.g. saml). This name will be joined together with the 'identity_url' column of the CSV for each user to construct the complete identity URL (e.g. saml:u1234567).
+          </p>
+          <p><i><strong>Note:</strong> only alphanumeric values, underscores and hyphens are allowed. You may also need to contact your admin if you don't know what to enter here.</i></p>
+        </td>
+      </tr>
+      <tr>
+        <td>Create non-existing groups,<br> roles and projects</td>
+        <td>
+          <p>
+            Enable this setting to create groups, roles and projects encountered inside the CSV which do not exist yet. These groups, roles or projects will be created with the most basic attributes and can be edited later.
+            Whether or not a created role will be a global role or a project role depends on the content of the current row of the CSV (which will be covered later on). The same counts for parent projects and sub-projects.
+            If a sub-project is created, it will be copied from the specified parent project.
+            If this setting was disabled and a non-existing group, role or project is encountered inside the CSV, the current row will be skipped and an error will be added to the error log.
+          </p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4 id="csv_construction">Constructing the CSV</h4>
+  <p>This subsection aims to explain in which way the CSV to be imported should be constructed. You can also download an example CSV at the <a href="#example_csv">bottom of this page</a> which already contains the right format and practical examples.</p>
+  <p>It is important that the CSV to be imported contains only <strong>comma-separated</strong> values for every record. Make sure the following columns are included in the header (first row) of the CSV and all subsequent rows specify a value for each of these columns (blank also counts as a value in some cases, the amount of commas for each row should be the same however):</p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Column name</th>
+        <th>Explanation</th>
+        <th>Row value required</th>
+        <th>Required in header</th>
+      </tr>
+      <tr>
+        <td>username</td>
+        <td>The username of the user</td>
+        <td>yes</td>
+        <td>yes</td>
+      </tr>
+      <tr>
+        <td>email</td>
+        <td>The email of the user</td>
+        <td>for new user</td>
+        <td>yes</td>
+      </tr>
+      <tr>
+        <td>first_name</td>
+        <td>The first name of the user</td>
+        <td>for new user</td>
+        <td>yes</td>
+      </tr>
+      <tr>
+        <td>last_name</td>
+        <td>The last name of the user</td>
+        <td>for new user</td>
+        <td>yes</td>
+      </tr>
+      <tr>
+        <td rowspan="2">administrator</td>
+        <td><strong>True</strong> if the user should become an administrator</td>
+        <td rowspan="2">for new user</td>
+        <td rowspan="2">yes</td>
+      </tr>
+      <tr>
+        <td><strong>False</strong> if the user should become a normal user</td>
+      </tr>
+      <tr>
+        <td>group</td>
+        <td>The name of a group in which the user should be added</td>
+        <td>no</td>
+        <td>yes</td>
+      </tr>
+      <tr>
+        <td>role</td>
+        <td>The name of a role which should be assigned to the user</td>
+        <td>no</td>
+        <td>yes</td>
+      </tr>
+      <tr>
+        <td>parent_project</td>
+        <td>
+          The <strong>unique identifier</strong> of the project which should become the parent project of the specified sub-project.<br><br>
+          <i><strong>Note:</strong> only lower case alphanumeric values, underscores and hyphens are allowed. Must start with a lower case letter.</i><br><br>
+          <i><strong>Note:</strong> This identifier will also be humanized after which it becomes the name of the project (e.g. project-name becomes Project Name).</i>
+        </td>
+        <td>no</td>
+        <td>yes</td>
+      </tr>
+      <tr>
+        <td>sub_project</td>
+        <td>
+          The <strong>unique identifier</strong> of the project which should become the sub-project of the specified parent project.<br><br>
+          <i><strong>Note:</strong> only lower case alphanumeric values, underscores and hyphens are allowed. Must start with a lower case letter.</i><br><br>
+          <i><strong>Note:</strong> This identifier will also be humanized after which it becomes the name of the project (e.g. project-name becomes Project Name).</i>
+        </td>
+        <td>no</td>
+        <td>yes</td>
+      </tr>
+      <tr>
+        <td>identity_url</td>
+        <td>The user ID of the user on the OmniAuth identity provider</td>
+        <td>if 'Identity URL' is the authentication method and user is new</td>
+        <td>if 'Identity URL' is the authentication method</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>The combinations of the values filled in or left blank for the group, role and project columns determine the action that will occur. The different options can be summed up as follows <strong>(assuming the create non-existing groups, roles and projects setting was enabled)</strong>:</p>
+  <table>
+    <tbody>
+      <tr>
+        <th colspan="5">Column</th>
+        <th></th>
+      </tr>
+      <tr>
+        <th>...</th>
+        <th>group</th>
+        <th>role</th>
+        <th>parent_project</th>
+        <th>sub_project</th>
+        <th>Result</th>
+      </tr>
+      <tr>
+        <td></td>
+        <td>value</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>user gets added to the group (group is created if non-existing)</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>-</td>
+        <td>value</td>
+        <td>-</td>
+        <td>-</td>
+        <td>specified role is treated as a global role. User gets added to the role (global role is created if non-existing)</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>value</td>
+        <td>value</td>
+        <td>-</td>
+        <td>-</td>
+        <td>specified role is treated as a global role. User gets added to the role and to the group (global role and group are created if non-existing)</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>-</td>
+        <td>value (defaults to Member)</td>
+        <td>value</td>
+        <td>-</td>
+        <td>user gets added individually to parent_project with the specified role (project and role are created if non-existing)</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>-</td>
+        <td>value (defaults to Member)</td>
+        <td>-</td>
+        <td>value</td>
+        <td>user gets added individually to sub_project with the specified role (project and role are created if non-existing, as parent_project is empty, sub_project actually becomes a parent project instead of a sub-project). </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>-</td>
+        <td>value (defaults to Member)</td>
+        <td>value</td>
+        <td>value</td>
+        <td>user gets added individually to the sub_project with the specified role (parent_project, sub_project and role are created if non-existing, sub_project gets copied from the parent_project)</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>value</td>
+        <td>value (defaults to Member)</td>
+        <td>value</td>
+        <td>-</td>
+        <td>user gets added to group and parent_project is assigned to the group with the specified role (group, role and parent_project are created if non-existing)</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>value</td>
+        <td>value (defaults to Member)</td>
+        <td>-</td>
+        <td>value</td>
+        <td>user gets added to group and sub_project is assigned to the group with the specified role (group, role and sub_project are created if non-existing, as parent_project is empty, the sub_project actually becomes a parent project instead of a sub-project)</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>value</td>
+        <td>value (defaults to Member)</td>
+        <td>value</td>
+        <td>value</td>
+        <td>user gets added to group and sub_project is assigned to the group with the specified role (group, role, parent_project and sub_project are created if non-existing, sub_project gets copied from the parent_project)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4 id="after_import">After the import</h4>
+  <p>The import will get scheduled as a background job after the CSV was submitted. This means that the actual import will happen in a seperate process in the background and doesn't slow down other users using OpenProject. This also means it can take a while before the import actually gets started depending on the available background workers and other jobs in the queue. After the import is done, you will receive an email containing statistics and an error log.</p>
+
+  <h3 id="example_csv">Download: Example CSV</h3>
+  <p>
+    An easy way to get started is by downloading the example CSV.
+    This CSV contains the right format (including headers) and examples on the different ways in which users, groups, roles and projects can be imported (including comments on the result).
+  </p>
+  <p><%= link_to "You can download the CSV here.","bulk-import-tutorial.csv", download: "bulk-import-tutorial.csv" %></p>
+  <p><i><strong>Please note:</strong> If you open the CSV file in an a program like Excel and the data looks scrambled, make sure you opened the file as a CSV file. Scrambled data means it was opened as a spreadsheet, which isn't the same as a CSV. Please refer to the documentation of the program you used to open the CSV if you don't know how to do this.</i></p>
+</div>

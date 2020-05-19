@@ -29,35 +29,52 @@
 # See doc/COPYRIGHT.md for more details.
 #++
 
-# Prevent load-order problems in case openproject-plugins is listed after a plugin in the Gemfile
-# or not at all
-require 'open_project/plugins'
+require 'spec_helper'
 
-module OpenProject::ManagementPlugin
-  class Engine < ::Rails::Engine
-    engine_name :openproject_management_plugin
+feature 'Bulk CSV import tutorial', type: :feature, js: true do
+  let(:current_user) { FactoryBot.create(:admin) }
 
-    include OpenProject::Plugins::ActsAsOpEngine
+  before do
+    login_as current_user
+  end
 
-    register 'openproject-management_plugin',
-             author_url: 'https://openproject.org',
-             global_assets: { css: 'management_plugin/management_plugin' },
-             requires_openproject: '>= 10.5.2',
-             bundled: true do
-      menu :account_menu, :user_import,
-           { controller: '/users', action: 'csv_import' },
-           caption: "Bulk importer",
-           before: :logout,
-           if: Proc.new {
-             User.current.logged? && User.current.allowed_to?(:import_users, nil, global: true)
-           }
+  context 'as an admin' do
+    scenario 'Clicking the link in the notification of the bulk import page opens the tutorial' do
+      visit bulk_import_path
+
+      click_on('You can click this link if you need any help, including a template you can adapt.')
+
+      expect_tabs(2)
+
+      switch_to_last_tab
+
+      expect_path(bulk_import_tutorial_path)
+
+      expect(page).not_to have_selector('.notification-box--content', text: '[Error 403]')
     end
+  end
 
-    patches %i[UsersController]
+  context 'as a non-admin' do
+    let(:current_user) { FactoryBot.create(:user) }
 
-    # Activate hooks to insert element into views of the core
-    initializer 'management_plugin.register_hooks' do
-      require 'open_project/management_plugin/hooks'
+    scenario 'navigating to the bulk CSV import tutorial page shows the unauthorized message' do
+      visit bulk_import_tutorial_path
+
+      expect(page).to have_selector('.notification-box--content', text: '[Error 403]')
     end
+  end
+
+  def expect_path(path)
+    expect(current_path).to eq(path)
+  end
+
+  def expect_tabs(number)
+    window = page.driver.browser.window_handles
+    expect(window.size).to eq(number)
+  end
+
+  def switch_to_last_tab
+    window = page.driver.browser.window_handles
+    page.driver.browser.switch_to.window(window.last)
   end
 end

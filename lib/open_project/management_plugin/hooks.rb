@@ -29,35 +29,10 @@
 # See doc/COPYRIGHT.md for more details.
 #++
 
-# Prevent load-order problems in case openproject-plugins is listed after a plugin in the Gemfile
-# or not at all
-require 'open_project/plugins'
-
 module OpenProject::ManagementPlugin
-  class Engine < ::Rails::Engine
-    engine_name :openproject_management_plugin
-
-    include OpenProject::Plugins::ActsAsOpEngine
-
-    register 'openproject-management_plugin',
-             author_url: 'https://openproject.org',
-             global_assets: { css: 'management_plugin/management_plugin' },
-             requires_openproject: '>= 10.5.2',
-             bundled: true do
-      menu :account_menu, :user_import,
-           { controller: '/users', action: 'csv_import' },
-           caption: "Bulk importer",
-           before: :logout,
-           if: Proc.new {
-             User.current.logged? && User.current.allowed_to?(:import_users, nil, global: true)
-           }
-    end
-
-    patches %i[UsersController]
-
-    # Activate hooks to insert element into views of the core
-    initializer 'management_plugin.register_hooks' do
-      require 'open_project/management_plugin/hooks'
-    end
+  class Hooks < Redmine::Hook::ViewListener
+    # Show Bulk user add button in Administration > Users & Permissions > Users
+    render_on :user_admin_action_menu,
+              partial: 'hooks/management_plugin/user_admin_action_menu'
   end
 end

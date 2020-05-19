@@ -29,35 +29,40 @@
 # See doc/COPYRIGHT.md for more details.
 #++
 
-# Prevent load-order problems in case openproject-plugins is listed after a plugin in the Gemfile
-# or not at all
-require 'open_project/plugins'
+require 'spec_helper'
 
-module OpenProject::ManagementPlugin
-  class Engine < ::Rails::Engine
-    engine_name :openproject_management_plugin
+describe UserImportMailer, type: :mailer do
+  let(:recipient) { FactoryBot.create(:user) }
 
-    include OpenProject::Plugins::ActsAsOpEngine
+  describe '#import_users_completed' do
+    let(:errors) { ["error1", "error2", "error3"] }
+    let(:created) { { "foo" => 123, "bar" => 456 } }
+    let!(:mail) { UserImportMailer.import_users_completed(recipient, errors, created) }
 
-    register 'openproject-management_plugin',
-             author_url: 'https://openproject.org',
-             global_assets: { css: 'management_plugin/management_plugin' },
-             requires_openproject: '>= 10.5.2',
-             bundled: true do
-      menu :account_menu, :user_import,
-           { controller: '/users', action: 'csv_import' },
-           caption: "Bulk importer",
-           before: :logout,
-           if: Proc.new {
-             User.current.logged? && User.current.allowed_to?(:import_users, nil, global: true)
-           }
+    it 'renders the headers' do
+      expect(mail.subject).to eq("User import completed")
+      expect(mail.to).to match_array([recipient.mail])
+      expect(mail.from).to eq([Setting.mail_from])
     end
 
-    patches %i[UsersController]
+    it 'renders the html body' do
+      expect(mail.html_part.body).to include("finished")
+      created.each do |key, value|
+        expect(mail.html_part.body).to match(/#{key}.*#{value}/)
+      end
+      errors.each do |error|
+        expect(mail.html_part.body).to include(error)
+      end
+    end
 
-    # Activate hooks to insert element into views of the core
-    initializer 'management_plugin.register_hooks' do
-      require 'open_project/management_plugin/hooks'
+    it 'renders the text body' do
+      expect(mail.text_part.body).to include("finished")
+      created.each do |key, value|
+        expect(mail.text_part.body).to match(/#{key}.*#{value}/)
+      end
+      errors.each do |error|
+        expect(mail.text_part.body).to include(error)
+      end
     end
   end
 end
