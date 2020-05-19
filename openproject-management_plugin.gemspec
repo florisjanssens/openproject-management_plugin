@@ -3,7 +3,7 @@
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
   s.name        = "openproject-management_plugin"
-  s.version     = "0.0.1"
+  s.version     = "2.0.0"
   s.authors     = "Floris Janssens"
   s.email       = "florisjanssens@outlook.com"
   s.homepage    = "https://github.com/florisjanssens/openproject-management_plugin"
