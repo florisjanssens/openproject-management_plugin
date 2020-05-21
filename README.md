@@ -1,6 +1,6 @@
 # OpenProject Management Plugin
 
-[![Build Status](https://travis-ci.com/florisjanssens/openproject-management_plugin.svg?token=Rqy6tmTtqW4aahqT8zzP&branch=master)](https://travis-ci.com/florisjanssens/openproject-management_plugin)
+[![Build Status](https://travis-ci.com/florisjanssens/openproject-management_plugin.svg?token=Rqy6tmTtqW4aahqT8zzP&branch=release/10.5.1)](https://travis-ci.com/florisjanssens/openproject-management_plugin)
 ![Rubocop checks](https://github.com/florisjanssens/openproject-management_plugin/workflows/Rubocop%20checks/badge.svg)
 
 
