@@ -73,7 +73,7 @@ module OpenProject::ManagementPlugin
            caption: "Bulk importer",
            before: :logout,
            if: Proc.new {
-             User.current.logged? && User.current.allowed_to?(:import_users, nil, global: true)
+             User.current.logged? && User.current.admin?
            }
     end
 
