@@ -1,6 +1,6 @@
 # OpenProject Management Plugin
 
-[![Build Status](https://travis-ci.com/florisjanssens/openproject-management_plugin.svg?token=Rqy6tmTtqW4aahqT8zzP&branch=master)](https://travis-ci.com/florisjanssens/openproject-management_plugin)
+[![Build Status](https://travis-ci.com/florisjanssens/openproject-management_plugin.svg?token=Rqy6tmTtqW4aahqT8zzP&branch=dev)](https://travis-ci.com/florisjanssens/openproject-management_plugin)
 ![Rubocop checks](https://github.com/florisjanssens/openproject-management_plugin/workflows/Rubocop%20checks/badge.svg)
 
 
@@ -8,7 +8,7 @@ This plugin adds features to OpenProject to efficiently manage users, groups, ro
 
 More detailed information about OpenProject itself can be found at [OpenProject.org.](http://openproject.org/)
 
-**Note:** The master branch should NOT be used to install the plugin as this branch is for development only. Please select a different branch for the version you want to install.
+**Note:** The dev branch should NOT be used to install the plugin as this branch is for development only. Please select a different branch for the version you want to install.
 
 ## Contents
 * [Features](#features)
@@ -74,7 +74,7 @@ This plugin has no requirements on top of the requirements of version >= 10.5.2 
 
 ## Installation
 ### Versions
-**Important:** This repository has multiple branches for different versions of OpenProject. Please select one of these versions and make sure your OpenProject version corresponds to the chosen version. The master branch should only be used to get a version which is developed alongside the OpenProject core development branch.
+**Important:** This repository has multiple branches for different versions of OpenProject. Please select one of these versions and make sure your OpenProject version corresponds to the chosen version. The dev branch should only be used to get a version which is developed alongside the OpenProject core development branch.
 
 ### In a production environment
 For installation instructions, it's best to refer to [the official OpenProject documentation on how to install plugins.](https://docs.openproject.org/installation-and-operations/configuration/plugins/)
