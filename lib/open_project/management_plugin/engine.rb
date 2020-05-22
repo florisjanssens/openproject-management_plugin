@@ -42,7 +42,7 @@ module OpenProject::ManagementPlugin
     register 'openproject-management_plugin',
              author_url: 'https://openproject.org',
              global_assets: { css: 'management_plugin/management_plugin' },
-             requires_openproject: '>= 10.5.2',
+             requires_openproject: '= 10.4.1',
              bundled: true do
       OpenProject::AccessControl.permission(:edit_project).actions << 'project_settings/bulk_setter/show'
       OpenProject::AccessControl.permission(:manage_versions).actions << 'project_settings/bulk_setter/show'

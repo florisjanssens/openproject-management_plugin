@@ -34,9 +34,9 @@ name: Rubocop checks
 
 on:
   push:
-    branches: [ master ]
+    branches: [ release/10.4.1 ]
   pull_request:
-    branches: [ master ]
+    branches: [ release/10.4.1 ]
 
 
 jobs:

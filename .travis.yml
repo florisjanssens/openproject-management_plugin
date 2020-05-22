@@ -32,14 +32,14 @@
 language: ruby
 
 rvm:
-- 2.6.6
+- 2.6.5
 
 sudo: required
 dist: xenial
 
 branches:
   only:
-  - master
+  - release/10.4.1
 
 cache:
   bundler: true
@@ -91,8 +91,8 @@ before_install:
 # a non-empty directory
 - git init
 - git remote add openproject https://github.com/opf/openproject.git
-- git fetch --depth=30 openproject dev
-- git checkout $(cat last_succesfull_build_sha.txt)
+- git fetch --depth=30 openproject tags/v10.4.1
+- git checkout 21892557124d9162f7f37e1ae4a1a6e91786592f
 
 - gem install bundler
 - nvm install --lts
