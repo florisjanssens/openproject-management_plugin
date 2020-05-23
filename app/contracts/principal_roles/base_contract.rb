@@ -31,8 +31,6 @@
 
 module PrincipalRoles
   class BaseContract < ::ModelContract
-    include AssignableValuesContract
-
     delegate :role_id,
              :principal_id,
              :new_record?,

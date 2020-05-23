@@ -29,23 +29,17 @@
 # See doc/COPYRIGHT.md for more details.
 #++
 
-module Categories
+module Groups
   class BaseContract < ::ModelContract
-    delegate :project,
-             :new_record?,
+    delegate :new_record?,
              to: :model
 
-    # Already validated by the model
-    attribute :name
-
-    # Optional attribute, also validated by the model if present.
-    # The model validation checks if the principal that's assigned
-    # to the Category is actually in the project of the Category.
-    # This also checks if the principal actually exists.
-    attribute :assigned_to
+    attribute :groupname
+    attribute :lastname
+    attribute :type
 
     def self.model
-      Category
+      Group
     end
 
     # Extend the validate method of the ModelContract with extra validations
@@ -53,32 +47,17 @@ module Categories
     # model validations and adds the errors together with the contract errors.
     def validate
       user_allowed_to_manage
-      validate_project_is_set
-      validate_name_is_set
+
       super
     end
 
     private
 
-    # Check if the user who called the service has the :manage_categories permission on the project
+    # Only admins can manage groups
     def user_allowed_to_manage
-      if model.project && !user.allowed_to?(:manage_categories, model.project)
+      unless user.admin?
         errors.add :base, :error_unauthorized
       end
-    end
-
-    # Check if a project is set (this would also give an error
-    # if only a project_id was passed and a project with the id doesn't exist)
-    def validate_project_is_set
-      errors.add :project, :blank if model.project.nil?
-    end
-
-    # Check if a name is set (this would also give an error
-    # if only a project_id was passed and a project with the id doesn't exist)
-    # In most other models this is checked in the model itself, but for some
-    # reason, some models seem to miss validations
-    def validate_name_is_set
-      errors.add :name, :blank if model.name.nil?
     end
   end
 end
