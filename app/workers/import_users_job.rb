@@ -407,8 +407,7 @@ class ImportUsersJob < ApplicationJob
     return errors if user_in_group?(user, group)
 
     begin
-      # add_members uses ::Groups::AddUsersService in the background
-      group.add_members!([user])
+      group.add_member!(user)
     rescue StandardError => e
       errors << e.message
     end
