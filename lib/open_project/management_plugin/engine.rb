@@ -37,13 +37,18 @@ module OpenProject::ManagementPlugin
   class Engine < ::Rails::Engine
     engine_name :openproject_management_plugin
 
+    config.to_prepare do
+      require 'open_project/management_plugin/patches'
+      require 'open_project/management_plugin/patches/users_controller_patch'
+      require 'open_project/management_plugin/patches/projects_controller_patch'
+    end
+
     include OpenProject::Plugins::ActsAsOpEngine
 
     register 'openproject-management_plugin',
              author_url: 'https://openproject.org',
              global_assets: { css: 'management_plugin/management_plugin' },
-             requires_openproject: '= 10.4.1',
-             bundled: true do
+             requires_openproject: '= 10.4.1' do
       OpenProject::AccessControl.permission(:edit_project).actions << 'project_settings/bulk_setter/show'
       OpenProject::AccessControl.permission(:manage_versions).actions << 'project_settings/bulk_setter/show'
       OpenProject::AccessControl.permission(:manage_categories).actions << 'project_settings/bulk_setter/show'
