@@ -36,7 +36,7 @@ require 'open_project/plugins'
 module OpenProject::ManagementPlugin
   class Engine < ::Rails::Engine
     engine_name :openproject_management_plugin
-    
+
     config.to_prepare do
       require 'open_project/management_plugin/patches'
       require 'open_project/management_plugin/patches/users_controller_patch'
