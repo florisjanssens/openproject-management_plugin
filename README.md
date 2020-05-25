@@ -10,6 +10,9 @@ More detailed information about OpenProject itself can be found at [OpenProject.
 
 **Note:** The dev branch should NOT be used to install the plugin as this branch is for development only. Please select a different branch for the version you want to install.
 
+**Note:** A failed build on the *dev* branch does not mean something is wrong with the plugin. The pipeline also runs the tests of the OpenProject core and follows its dev branch. The dev branch of the core may contain some flickering specs. Even though the plugin pipeline gets the last successful build of the core, these flickering specs could make the build of the core pass one time and fail another without even making changes. Therefore the build of the plugin on the dev branch could also fail for these specs.
+If the dev branch failed to build and this is caused by a single or a few specs that flicker in the core (it is possible to find these by looking at the Travis logs of the core), and the plugin did not adapt anything related to the failed specs, it is safe to assume there is no issue.
+
 ## Contents
 * [Features](#features)
 * [Requirements](#requirements)
