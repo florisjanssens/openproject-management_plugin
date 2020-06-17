@@ -402,18 +402,13 @@ class ImportUsersJob < ApplicationJob
 
   # Adds a user to a group if the user isn't in the group yet
   def check_add_user_to_group(user, group)
-    errors = []
+    return [] if user_in_group?(user, group)
 
-    return errors if user_in_group?(user, group)
+    service_result = ::Groups::AddUsersService
+                     .new(group, current_user: recipient)
+                     .call([user.id])
 
-    begin
-      # add_members uses ::Groups::AddUsersService in the background
-      group.add_members!([user])
-    rescue StandardError => e
-      errors << e.message
-    end
-
-    errors
+    service_result.errors.full_messages
   end
 
   # Create a global role
