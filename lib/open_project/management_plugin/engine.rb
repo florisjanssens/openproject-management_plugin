@@ -38,9 +38,13 @@ module OpenProject::ManagementPlugin
     engine_name :openproject_management_plugin
 
     config.to_prepare do
-      require 'open_project/management_plugin/patches'
-      require 'open_project/management_plugin/patches/users_controller_patch'
-      require 'open_project/management_plugin/patches/projects_controller_patch'
+      Dir[File.expand_path("../../../app/contracts/**/base_*.rb", File.dirname(__FILE__))].sort.each { |f| require f }
+      Dir[File.expand_path("../../../app/contracts/**/*.rb", File.dirname(__FILE__))].sort.each { |f| require f }
+      Dir[File.expand_path("../../../app/services/**/*.rb", File.dirname(__FILE__))].sort.each { |f| require f }
+      Dir[File.expand_path("../../../app/mailers/**/*.rb", File.dirname(__FILE__))].sort.each { |f| require f }
+      Dir[File.expand_path("../../../app/workers/**/*.rb", File.dirname(__FILE__))].sort.each { |f| require f }
+      Dir[File.expand_path("patches/*.rb", File.dirname(__FILE__))].sort.each { |f| require f }
+      require_relative "../../../app/controllers/project_settings/bulk_setter_controller"
     end
 
     include OpenProject::Plugins::ActsAsOpEngine
@@ -48,7 +52,7 @@ module OpenProject::ManagementPlugin
     register 'openproject-management_plugin',
              author_url: 'https://openproject.org',
              global_assets: { css: 'management_plugin/management_plugin' },
-             requires_openproject: '>= 10.5.2' do
+             requires_openproject: '>= 10.6.2' do
       OpenProject::AccessControl.permission(:edit_project).actions << 'project_settings/bulk_setter/show'
       OpenProject::AccessControl.permission(:manage_versions).actions << 'project_settings/bulk_setter/show'
       OpenProject::AccessControl.permission(:manage_categories).actions << 'project_settings/bulk_setter/show'
