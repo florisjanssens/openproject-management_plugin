@@ -39,7 +39,7 @@ dist: xenial
 
 branches:
   only:
-  - dev
+  - release/10.6.1
 
 cache:
   bundler: true
@@ -81,18 +81,20 @@ before_install:
 # Install the plugin in the core
 - cp $TRAVIS_BUILD_DIR/Gemfile.plugins Gemfile.plugins
 
+# Note: this part is disabled for release versions as these don't change anymore.
+# Therefore, for release versions, a fixed commit can be used instead of the commit of the last successful build.
 # (only executed in the prepare cache  job and reused later) get the SHA of the last succesfull
 # travis build of the OpenProject Core dev branch and store in a file for later use.
 # This SHA is kept the same for all jobs but is updated again for a completely new run of the pipeline.
 # The scripts/get_last_succesfull_sha.sh script uses GitHub API requests to finds this SHA
-- if [ "$TRAVIS_JOB_NAME" == "Prepare cache" ]; then rm -rf last_succesfull_build_sha.txt && $TRAVIS_BUILD_DIR/scripts/get_last_succesfull_sha.sh > last_succesfull_build_sha.txt; fi
+# - if [ "$TRAVIS_JOB_NAME" == "Prepare cache" ]; then rm -rf last_succesfull_build_sha.txt && $TRAVIS_BUILD_DIR/scripts/get_last_succesfull_sha.sh > last_succesfull_build_sha.txt; fi
 
 # Get the OpenProject core. Use fetch & checkout to be able to clone into
 # a non-empty directory
 - git init
 - git remote add openproject https://github.com/opf/openproject.git
-- git fetch --depth=30 openproject dev
-- git checkout $(cat last_succesfull_build_sha.txt)
+- git fetch --depth=30 openproject tags/v10.6.1
+- git checkout 94403fbec26e72fcc0a521a146230f4ebe103f72
 
 - gem install bundler
 - nvm install --lts

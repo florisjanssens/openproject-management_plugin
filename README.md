@@ -1,6 +1,6 @@
 # OpenProject Management Plugin
 
-[![Build Status](https://travis-ci.com/florisjanssens/openproject-management_plugin.svg?token=Rqy6tmTtqW4aahqT8zzP&branch=dev)](https://travis-ci.com/florisjanssens/openproject-management_plugin)
+[![Build Status](https://travis-ci.com/florisjanssens/openproject-management_plugin.svg?token=Rqy6tmTtqW4aahqT8zzP&branch=release/10.6.1)](https://travis-ci.com/florisjanssens/openproject-management_plugin)
 ![Rubocop checks](https://github.com/florisjanssens/openproject-management_plugin/workflows/Rubocop%20checks/badge.svg)
 
 
@@ -73,7 +73,7 @@ This allows the administrator to  create a specific role with the chosen permiss
 **Workflow:** The user selects which settings to copy and clicks on "Apply". A background job gets queued which will be picked up by a free worker process. The worker copies the chosen settings to each active subproject. Operations resulting in an error will add an error message to the error log indicating the error and the specific subproject. The copy continues if an error was encountered for a specific setting and project. At the end, the user receives an email which indicates the copy is done and contains an error log.
 
 ## Requirements
-This plugin has no requirements on top of the requirements of version >= 10.5.2 of the [OpenProject Core](https://github.com/opf/openproject/).
+This plugin has no requirements on top of the requirements of version 10.6.1 of the [OpenProject Core](https://github.com/opf/openproject/).
 
 ## Installation
 ### Versions
