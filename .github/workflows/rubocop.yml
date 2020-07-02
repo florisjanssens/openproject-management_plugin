@@ -36,7 +36,7 @@ on:
   push:
     branches: [ release/10.6.1 ]
   pull_request:
-    branches: [ release/10.6.1s ]
+    branches: [ release/10.6.1 ]
 
 
 jobs:
