@@ -94,7 +94,7 @@ before_install:
 - git init
 - git remote add openproject https://github.com/opf/openproject.git
 - git fetch --depth=30 openproject tags/v10.6.4
-- git checkout fc3c853f8f61c44e84362eefa0dd20b68b004035
+- git checkout 9c6252c65b48dbbccfa185b27e8d896b786fe2a8
 
 - gem install bundler
 - nvm install --lts
